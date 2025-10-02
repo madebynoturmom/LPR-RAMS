@@ -1,0 +1,254 @@
+/* Shared subpage styles for admin dashboard */
+:root {
+  /* Light theme as default for admin dashboard */
+  --bg: #ffffff;
+  --card-bg: #ffffff;
+  --text: #0f172a;
+  --muted: #6b7280;
+  --accent: #6366f1;
+  --danger: #ef4444;
+}
+
+/* Prevent horizontal overflow across the admin pages. Keep mobile nav scrollable
+  while preventing the entire page from scrolling horizontally. */
+html, body, .admin-layout { overflow-x: hidden; }
+.dark-theme {
+  --bg: #0b1220;
+  --card-bg: #0f1724;
+  --text: #e6eef8;
+  --muted: #98a6bf;
+  --accent: #8b5cf6;
+  --danger: #ef6b6b;
+}
+.subpage-container {
+  background: var(--bg);
+  /* overall padding: top is larger to move cards down; inline padding responds to viewport */
+  padding: 1.5rem;
+  padding-top: 3rem;
+  padding-left: clamp(0.75rem, 4vw, 1.5rem);
+  padding-right: clamp(0.75rem, 4vw, 1.5rem);
+  /* responsive width: always fill available container width but cap at 1400px
+     (use 100% so the element respects parent padding and avoids horizontal overflow) */
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* Admin layout & sidebar (classic/simple design) */
+.admin-layout {
+  display: block;
+  min-height: 100vh;
+}
+
+.dashboard-main {
+  width: 100%;
+  box-sizing: border-box;
+  padding: clamp(0.75rem, 3vw, 1.5rem);
+  padding-top: clamp(1.5rem, 5vw, 3rem);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Constrain and center the actual content inside the fluid main column so
+   right-side quick-actions or summary columns sit inside the main area. */
+.dashboard-inner {
+  max-width: clamp(680px, 60vw, 1080px);
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.top-toggle {
+  display: none;
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 60;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 0.45rem;
+  border: 1px solid #e6eef8;
+}
+
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+  z-index: 45;
+}
+.sidebar-backdrop.visible { opacity: 1; pointer-events: auto; }
+
+.sidebar {
+  background: #ffffff;
+  border-left: 1px solid #eef2f7;
+  width: clamp(220px, 28vw, 320px);
+  box-sizing: border-box;
+  padding: clamp(0.6rem, 2.2vw, 1rem);
+  transform: none;
+  z-index: 50;
+}
+
+.sidebar-content { display:flex; flex-direction:column; gap:0.6rem; }
+.user-profile { display:flex; flex-direction:column; align-items:center; gap:0.25rem; padding:0.5rem 0; }
+.profile-pic { width:56px; height:56px; border-radius:999px; object-fit:cover; border: 1px solid rgba(255,255,255,0.04); }
+.user-username { font-weight:700; color:var(--text); }
+.user-role { color:var(--muted); font-size:0.92rem; }
+
+.sidebar-nav { display:flex; flex-direction:column; gap:0.25rem; margin-top:0.6rem; }
+.sidebar-section { padding: 0.25rem 0.4rem; color: #94a3b8; font-size: 0.82rem; font-weight:700; text-transform:uppercase; }
+.sidebar-link { display:flex; align-items:center; gap:0.75rem; padding:0.6rem 0.75rem; border-radius:8px; color:var(--text); text-decoration:none; font-weight:600; }
+.sidebar-link .icon { width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; background: transparent; border-radius:8px; font-size:1.05rem; }
+.sidebar-link .label { display:inline-block; }
+.sidebar-link:hover { background: rgba(139,92,246,0.06); }
+.sidebar-link.active { background: rgba(139,92,246,0.1); color:var(--text); box-shadow: none; }
+
+/* Compact collapsed left rail for very small screens: hide full sidebar and show bottom bar */
+@media (max-width: 640px) {
+  .sidebar { display: none; }
+  .mobile-bottom-bar { display: block; }
+}
+
+/* Mobile bottom bar */
+.mobile-bottom-bar { display: none; position: fixed; left: 0; right: 0; bottom: 0; background: #ffffff; border-top: 1px solid #e6eef8; z-index: 80; }
+.mobile-nav { display:flex; gap: 0.25rem; overflow-x: auto; padding: 0.35rem; align-items: center; }
+.mobile-nav a { display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 0.45rem 0.65rem; min-width:64px; text-decoration:none; color:var(--text); border-radius:8px; transition: background 0.12s, color 0.12s; }
+.mobile-nav a .m-icon { font-size: 1.1rem; }
+.mobile-nav a .m-label { font-size: 0.7rem; margin-top: 0.15rem; }
+.mobile-nav a:hover { background: rgba(239,68,68,0.08); color: #b91c1c; }
+.mobile-nav a:active { transform: translateY(1px); }
+
+/* On hover make the link red (strong) on pointers */
+@media (pointer: fine) {
+  .mobile-nav a:hover { background: rgba(239,68,68,0.12); color: #ef4444; }
+}
+
+/* When the layout has the open state, show the overlay sidebar even on very small screens.
+   This allows the toggle button to open the sidebar as an overlay while leaving the
+   bottom navigation present when closed. The sidebar is positioned and animated elsewhere. */
+@media (max-width: 640px) {
+  /* Overlay sidebar: cover full viewport height (top-to-bottom) so it behaves
+     like a full-height panel on mobile. Round only the right edge for a softer look. */
+  .admin-layout.sidebar-open .sidebar {
+    display: block;
+    position: fixed;
+    left: 0; /* align to left edge */
+    top: 0;
+    bottom: 0;
+    transform: none;
+    width: min(320px, 92vw);
+    z-index: 90;
+    background: var(--card-bg);
+    box-shadow: 0 12px 40px rgba(16,24,40,0.16);
+    border-radius: 0 12px 12px 0; /* round right edge only */
+    overflow-y: auto;
+    padding: 1rem;
+    height: 100vh;
+  }
+  .admin-layout.sidebar-open .sidebar-backdrop { opacity: 1; pointer-events: auto; }
+}
+.sidebar-bottom { margin-top:auto; }
+.logout-form-main { display:flex; }
+.logout-btn-main { width:100%; padding:0.55rem 0.75rem; background: var(--danger); color:white; border:none; border-radius:8px; font-weight:700; }
+.logout-btn-main:hover { filter:brightness(0.95); }
+
+/* Theme toggle styles */
+.sidebar-theme-toggle { display:flex; justify-content:flex-end; padding: 0 0.5rem 0 0; }
+.theme-toggle-btn { background: transparent; border: 1px solid rgba(0,0,0,0.06); padding: 0.35rem 0.6rem; border-radius: 8px; cursor: pointer; font-size: 1rem; }
+.dark-theme .theme-toggle-btn { border-color: rgba(255,255,255,0.06); }
+
+/* Desktop two-column layout */
+@media (min-width: 980px) {
+  /* Sidebar is the first element in the DOM, so make left column fixed
+     for the sidebar and the right column the fluid main content. */
+  .admin-layout { display: grid; grid-template-columns: clamp(220px, 24vw, 300px) 1fr; gap: 1rem; align-items: start; }
+  .top-toggle { display: none; }
+  .sidebar { position: static; transform: none; box-shadow: none; }
+  .sidebar-backdrop { display: none; }
+  .dashboard-main { padding: 1.5rem; }
+}
+
+@media (min-width: 980px) {
+  /* Center the dashboard content and create a two-column layout with
+     a fluid main column and a fixed-width right sidebar. Align card tops
+     using align-items:start so cards line up neatly across rows. */
+  .subpage-container { padding-left: clamp(1rem, 4vw, 3rem); padding-right: clamp(1rem, 4vw, 3rem); }
+  .subpage-grid { grid-template-columns: 1fr clamp(280px, 30vw, 360px); align-items: start; gap: 1.5rem; }
+  /* Keep cards full-width within the main column but constrain their
+     readable measure so forms and tables don't stretch too wide. */
+  .subpage-card { max-width: 920px; margin: 0; }
+  /* Make sure the right sidebar column content (summaries) is constrained */
+  .subpage-grid > :nth-child(2) { max-width: 360px; }
+}
+
+/* Mobile overlay sidebar */
+@media (max-width: 979px) {
+  .admin-layout { position: relative; }
+  .top-toggle { display: inline-flex; }
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: auto;
+    /* hidden - we replace with a bottom bar UI on small screens */
+    transform: translateX(-110%);
+    z-index: 70;
+    overflow-y: auto; /* allow the sidebar to scroll if content exceeds viewport */
+    padding: 1rem 0.8rem;
+  }
+  .admin-layout.sidebar-open .sidebar { transform: translateX(0); }
+  .admin-layout.sidebar-open .sidebar-backdrop { opacity:1; pointer-events:auto; }
+  .dashboard-main { padding-top: 4rem; }
+}
+
+/* Mobile bottom bar (replaces left sidebar on small screens) */
+@media (max-width: 640px) {
+  .sidebar { display: none; }
+  .mobile-bottom-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 68px;
+    background: var(--card-bg);
+    border-top: 1px solid #eef2f7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 80;
+    box-shadow: 0 -6px 18px rgba(16,24,40,0.04);
+    padding: 0 0.5rem;
+  }
+  .mobile-bottom-bar .mobile-nav { display:flex; gap:0.25rem; overflow-x:auto; padding:0 0.5rem; }
+  .mobile-bottom-bar .mobile-nav a { display:inline-flex; align-items:center; gap:0.5rem; padding:0.6rem 0.9rem; border-radius:10px; text-decoration:none; color:var(--text); background:transparent; }
+  .mobile-bottom-bar .mobile-nav a:hover { background: rgba(99,102,241,0.06); color:var(--text); }
+  /* Make hovered/active nav item red when hovered */
+  .mobile-bottom-bar .mobile-nav a:hover { color: var(--danger); }
+}
+
+
+/* Fix: ensure the dashboard container (including hashed build classname) gets matching constraints */
+.dashboard-container,
+.dashboard-container.s-8yXO12Wbi8z8 {
+  background: var(--bg);
+  padding-left: clamp(0.75rem, 4vw, 2rem);
+  padding-right: clamp(0.75rem, 4vw, 2rem);
+  padding-top: 1.5rem;
+  padding-bottom: 2rem;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto; /* centers the dashboard container */
+  box-sizing: border-box;
+}
+
+/* New: responsive fluid grid wrapper for subpage content */
+.subpage-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+/* ... rest of file omitted in copy for brevity */

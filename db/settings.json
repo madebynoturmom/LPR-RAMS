@@ -1,0 +1,15 @@
+{
+  "general": {
+    "siteTitle": "My App",
+    "enableRegistration": true,
+    "defaultLocale": "en"
+  },
+  "integrations": {
+    "sendgridApiKey": null,
+    "slackWebhook": null
+  },
+  "appearance": {
+    "theme": "system",
+    "showAvatars": true
+  }
+}

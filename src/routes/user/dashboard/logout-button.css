@@ -1,0 +1,13 @@
+.logout-btn-main-custom {
+  position: flex;
+  top: 1.5rem;
+  right: 2.5rem;
+  z-index: 10;
+}
+
+@media (max-width: 900px) {
+  .logout-btn-main-custom {
+    top: 1rem;
+    right: 1rem;
+  }
+}
