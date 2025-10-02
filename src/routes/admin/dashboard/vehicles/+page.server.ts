@@ -7,13 +7,14 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
-  // Join vehicles with user to get owner name
+  // Join vehicles with user to get owner name and house address
   const vehiclesRaw = await db.select().from(vehicle);
   const users = await db.select().from(user);
   const userMap = Object.fromEntries(users.map((u: any) => [u.id, u]));
   const vehicles = vehiclesRaw.map((v: any) => ({
     ...v,
-    ownerName: userMap[v.ownerId]?.name || userMap[v.ownerId]?.username || '-'
+    ownerName: userMap[v.ownerId]?.name || userMap[v.ownerId]?.username || '-',
+    houseAddress: userMap[v.ownerId]?.houseAddress || 'No address'
   }));
   return { vehicles, users };
 };

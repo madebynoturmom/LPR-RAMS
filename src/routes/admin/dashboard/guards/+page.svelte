@@ -93,85 +93,148 @@
   }
 </script>
 
- 
+<svelte:head>
+  <link rel="stylesheet" href="/admin/dashboard/subpage.css" />
+  <link rel="stylesheet" href="/admin/dashboard/guards/guards.css" />
+</svelte:head>
 
 <div class="subpage-container">
   <div class="subpage-card">
     <div class="subpage-header">
       <div>
         <h2 class="subpage-title">Manage Guards</h2>
+        <p class="text-gray-500 mt-2 text-sm">
+          {displayedGuards.length} guard{displayedGuards.length !== 1 ? 's' : ''} on duty
+        </p>
       </div>
       <div class="subpage-actions">
-        <a href="/admin/dashboard/guards/create" class="add-guard-btn">+ Add Guard</a>
+        <a href="/admin/dashboard/guards/create" class="add-guard-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Add Guard
+        </a>
       </div>
     </div>
-  <h3>Guards List</h3>
-  {#if displayedGuards.length > 0}
-    <table class="guard-table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Phone</th>
-          <th>Guard ID</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#if selectedGuard}
-          <tr class="edit-row"><td colspan="3">
-            <div class="edit-card">
-              <form class="edit-form subpage-form" on:submit={submitEdit}>
-                <input type="hidden" name="id" value={selectedGuard.id} />
-                <label>Name<input name="name" value={selectedGuard.name} required /></label>
-                <label>Phone<input name="phone" value={selectedGuard.phone} required /></label>
-                <label>Guard ID<input name="guardId" value={selectedGuard.guardId} required /></label>
-                <div style="display:flex; gap:0.5rem; margin-top:0.75rem;">
-                  <button type="submit" class="btn btn-update">Update</button>
-                  <button type="button" class="btn btn-ghost" on:click={cancelEdit}>Cancel</button>
+
+    {#if selectedGuard}
+      <div class="edit-card">
+        <div class="edit-card-header">
+          <h3>Edit Guard</h3>
+          <button type="button" class="btn btn-ghost" on:click={cancelEdit}>✕</button>
+        </div>
+        <form class="edit-form subpage-form" on:submit={submitEdit}>
+          <input type="hidden" name="id" value={selectedGuard.id} />
+          <label>
+            Name
+            <input name="name" value={selectedGuard.name} required placeholder="Enter guard name" />
+          </label>
+          <label>
+            Phone
+            <input name="phone" value={selectedGuard.phone} required placeholder="Enter phone number" />
+          </label>
+          <label>
+            Guard ID
+            <input name="guardId" value={selectedGuard.guardId} required placeholder="Enter guard ID" />
+          </label>
+          <div class="flex gap-2 mt-3">
+            <button type="submit" class="btn btn-update">Save Changes</button>
+            <button type="button" class="btn btn-ghost" on:click={cancelEdit}>Cancel</button>
+          </div>
+          {#if error}<div class="error">{error}</div>{/if}
+        </form>
+      </div>
+    {/if}
+
+    {#if displayedGuards.length > 0}
+      <div class="resident-list">
+        {#each displayedGuards as guard (guard.id)}
+          <div class="resident-item {expandedId === String(guard.id) ? 'expanded' : ''}">
+            <button 
+              class="resident-summary" 
+              on:click={() => toggleExpand(guard.id)} 
+              aria-expanded={expandedId === String(guard.id)}
+            >
+              <div class="guard-avatar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2a5 5 0 1 0 5 5 5 5 0 0 0-5-5Z"></path>
+                  <path d="M20 21a8 8 0 0 0-16 0"></path>
+                  <path d="m2 8 10-5 10 5-10 5Z"></path>
+                  <path d="m4 10 8 4 8-4"></path>
+                </svg>
+              </div>
+              <div class="guard-info">
+                <div class="resident-name">{guard.name ?? 'N/A'}</div>
+                <div class="resident-house">
+                  <span class="guard-badge">#{guard.guardId ?? 'N/A'}</span>
+                  <span class="guard-phone">{guard.phone ?? 'No phone'}</span>
                 </div>
-                {#if error}<div class="error">{error}</div>{/if}
-              </form>
-            </div>
-          </td></tr>
-        {/if}
-        {#each displayedGuards as guard}
-          <tr class="guard-summary" on:click={() => toggleExpand(guard.id)}>
-            <td data-label="Name">{guard.name ?? '-'}</td>
-            <td data-label="Phone">{guard.phone ?? '-'}</td>
-            <td data-label="Guard ID">{guard.guardId ?? '-'}</td>
-          </tr>
-          {#if expandedId === String(guard.id)}
-            <tr class="guard-details">
-              <td colspan="3">
-                <div class="resident-details" style="padding:0.75rem 0;">
-                  <div class="detail-row"><strong>Name:</strong> {guard.name ?? '—'}</div>
-                  <div class="detail-row"><strong>Phone:</strong> {guard.phone ?? '—'}</div>
-                  <div class="detail-row"><strong>Guard ID:</strong> {guard.guardId ?? '—'}</div>
-                  <div class="detail-actions" style="margin-top:0.5rem;">
-                    <button type="button" class="edit-btn" on:click|stopPropagation={() => openEdit(guard)}>Edit</button>
-                    <form method="POST" action="?/delete" style="display:inline">
-                      <input type="hidden" name="id" value={guard.id} />
-                      <button type="submit" class="delete-btn" on:click|stopPropagation>{'Delete'}</button>
-                    </form>
+              </div>
+              <div class="chev">{expandedId === String(guard.id) ? '▾' : '▸'}</div>
+            </button>
+            
+            {#if expandedId === String(guard.id)}
+              <div class="resident-details">
+                <div class="detail-grid">
+                  <div class="detail-item">
+                    <div class="detail-label">Full Name</div>
+                    <div class="detail-value">{guard.name ?? '—'}</div>
+                  </div>
+                  <div class="detail-item">
+                    <div class="detail-label">Guard ID</div>
+                    <div class="detail-value">
+                      <span class="badge-id">{guard.guardId ?? '—'}</span>
+                    </div>
+                  </div>
+                  <div class="detail-item">
+                    <div class="detail-label">Phone Number</div>
+                    <div class="detail-value">{guard.phone ?? '—'}</div>
+                  </div>
+                  <div class="detail-item">
+                    <div class="detail-label">Status</div>
+                    <div class="detail-value">
+                      <span class="status-badge active">Active</span>
+                    </div>
                   </div>
                 </div>
-              </td>
-            </tr>
-          {/if}
+                
+                <div class="detail-actions">
+                  <button type="button" class="edit-btn" on:click|stopPropagation={() => openEdit(guard)}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                    </svg>
+                    Edit
+                  </button>
+                  <form method="POST" action="?/delete" class="inline">
+                    <input type="hidden" name="id" value={guard.id} />
+                    <button type="submit" class="delete-btn" on:click|stopPropagation>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      </svg>
+                      Delete
+                    </button>
+                  </form>
+                </div>
+              </div>
+            {/if}
+          </div>
         {/each}
-      </tbody>
-    </table>
-
-  {:else}
-    <p>No guards found.</p>
-  {/if}
+      </div>
+    {:else}
+      <div class="empty-state">
+        <div class="empty-icon">👮</div>
+        <p class="empty-text">No guards found</p>
+        <p class="empty-subtext">Add your first guard to get started</p>
+      </div>
+    {/if}
   </div>
 </div>
 
-<!-- guard styles moved to subpage.css -->
-
 {#if showToast}
   <div class="toast-wrap" role="status" aria-live="polite">
-    <div class="toast">Guard deleted</div>
+    <div class="toast">Guard deleted successfully</div>
     <div class="toast-progress"><div class="toast-bar" style="width:{toastProgress}%"></div></div>
   </div>
 {/if}

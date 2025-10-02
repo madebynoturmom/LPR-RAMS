@@ -27,6 +27,27 @@
 </script>
 
 <div class="user-layout" class:sidebar-open={$sidebarOpen}>
+  <!-- Top header with user info and logout -->
+  <header class="dashboard-header">
+    <div class="header-content">
+      <div class="user-info">
+        <img src={userProfilePic} alt="{userName}" class="user-avatar" />
+        <div class="user-details">
+          <span class="user-name">{userName}</span>
+          <span class="user-role-badge">{userRole}</span>
+        </div>
+      </div>
+      <a href="/logout" class="logout-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span>Logout</span>
+      </a>
+    </div>
+  </header>
+  
   <!-- Left sidebar removed; bottom bar is the primary navigation now -->
   <main class="dashboard-main">
     <div class="dashboard-inner">
@@ -46,6 +67,15 @@
           <span class="m-label">{nav.label}</span>
         </a>
       {/each}
+      <!-- Logout button in mobile nav -->
+      <a href="/logout" class="logout-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="m-icon-img">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span class="m-label">Logout</span>
+      </a>
     </nav>
   </div>
 </div>
@@ -59,6 +89,99 @@
   .user-layout {
     display: block;
     min-height: auto;
+  }
+
+  /* Dashboard header */
+  .dashboard-header {
+    background: var(--card-bg, #ffffff);
+    border-bottom: 1px solid #e6eef8;
+    padding: 1rem clamp(0.5rem, 3vw, 1.5rem);
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  .header-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e6eef8;
+  }
+
+  .user-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  .user-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text, #1f2937);
+  }
+
+  .user-role-badge {
+    font-size: 0.75rem;
+    color: var(--muted, #6b7280);
+    text-transform: capitalize;
+  }
+
+  .logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: 1px solid #e6eef8;
+    border-radius: 8px;
+    color: var(--text, #1f2937);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+
+  .logout-btn:hover {
+    background: #fee;
+    border-color: #ef4444;
+    color: #ef4444;
+  }
+
+  .logout-btn svg {
+    transition: transform 0.2s ease;
+  }
+
+  .logout-btn:hover svg {
+    transform: translateX(2px);
+  }
+
+  /* Hide logout button text on very small screens */
+  @media (max-width: 480px) {
+    .logout-btn span {
+      display: none;
+    }
+    
+    .logout-btn {
+      padding: 0.5rem;
+    }
   }
 
   .dashboard-main {
@@ -152,6 +275,21 @@
     font-size: 11px;
     line-height: 1;
     text-align: center;
+  }
+
+  /* Logout link in mobile nav */
+  .mobile-nav .logout-link {
+    color: #ef4444;
+  }
+
+  .mobile-nav .logout-link:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+  }
+
+  .mobile-nav .logout-link .m-icon-img {
+    filter: none;
+    stroke: currentColor;
   }
 
   /* Hide bottom bar on larger screens */

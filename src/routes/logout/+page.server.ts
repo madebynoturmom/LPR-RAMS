@@ -5,6 +5,17 @@ import { eq } from 'drizzle-orm';
 import { encodeHexLowerCase } from '@oslojs/encoding';
 import { sha256 } from '@oslojs/crypto/sha2';
 
+// Handle GET requests (when user clicks logout link)
+export async function load(event: RequestEvent) {
+  const sessionToken = event.cookies.get('auth-session');
+  if (sessionToken) {
+    await db.delete(sessionTable).where(eq(sessionTable.id, sessionToken));
+    event.cookies.delete('auth-session', { path: '/' });
+  }
+  throw redirect(303, '/login');
+}
+
+// Handle POST requests (when using form submission)
 export const actions = {
   default: async (event: RequestEvent) => {
     const sessionToken = event.cookies.get('auth-session');
@@ -12,6 +23,6 @@ export const actions = {
       await db.delete(sessionTable).where(eq(sessionTable.id, sessionToken));
       event.cookies.delete('auth-session', { path: '/' });
     }
-  throw redirect(303, '/login');
+    throw redirect(303, '/login');
   }
 };

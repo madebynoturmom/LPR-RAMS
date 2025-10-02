@@ -9,9 +9,9 @@
 	let password = '';
 
 	// Mobile-friendly single edit card
-	let selectedAdmin: { id?: string | number; username?: string } | null = null;
+	let selectedAdmin: Partial<Admin> | null = null;
 
-	function openEdit(admin: { id?: string | number; username?: string }) {
+	function openEdit(admin: Admin) {
 		selectedAdmin = { ...admin };
 		error = null;
 	}
@@ -53,6 +53,51 @@
 		requestAnimationFrame(tick);
 	}
 
+	let uploading = false;
+	let uploadedImageUrl = '';
+
+	async function handleFileUpload(e: Event) {
+		const input = e.target as HTMLInputElement;
+		const file = input.files?.[0];
+		if (!file) return;
+
+		// Validate file type
+		if (!file.type.startsWith('image/')) {
+			error = 'Please select an image file';
+			return;
+		}
+
+		// Validate file size (max 5MB)
+		if (file.size > 5 * 1024 * 1024) {
+			error = 'Image size must be less than 5MB';
+			return;
+		}
+
+		uploading = true;
+		error = null;
+
+		try {
+			const formData = new FormData();
+			formData.append('file', file);
+			formData.append('prefix', 'admin');
+
+			const res = await fetch('/api/upload', { method: 'POST', body: formData });
+			if (!res.ok) {
+				throw new Error('Upload failed');
+			}
+
+			const data = await res.json();
+			uploadedImageUrl = data.url;
+			if (selectedAdmin) {
+				selectedAdmin.profilePic = data.url;
+			}
+		} catch (e) {
+			error = 'Failed to upload image';
+		} finally {
+			uploading = false;
+		}
+	}
+
 	async function submitEdit(e: Event) {
 		e.preventDefault();
 		error = null;
@@ -65,15 +110,26 @@
 		}
 		// update local list for immediacy
 		const id = formData.get('id') as string;
-		const newUsername = formData.get('username') as string;
 		const idx = admins.findIndex((a: Admin) => String(a.id) === String(id));
-		if (idx !== -1) admins[idx] = { ...admins[idx], username: newUsername };
+		if (idx !== -1) {
+			admins[idx] = {
+				...admins[idx],
+				username: formData.get('username') as string,
+				name: formData.get('name') as string,
+				email: formData.get('email') as string,
+				phone: formData.get('phone') as string,
+				profilePic: formData.get('profilePic') as string
+			};
+		}
 		selectedAdmin = null;
+		uploadedImageUrl = '';
 	}
 </script>
 
-<!-- styles moved to subpage.css -->
- 
+<svelte:head>
+	<link rel="stylesheet" href="/admin/dashboard/subpage.css" />
+	<link rel="stylesheet" href="/admin/dashboard/admins/admins.css" />
+</svelte:head>
 
 <div class="subpage-container">
 	<div class="subpage-card">
@@ -99,32 +155,188 @@
 		<div class="admin-list-card">
 			{#if selectedAdmin}
 				<div class="edit-card">
+					<div class="edit-card-header">
+						<h3>Edit Admin</h3>
+						<button type="button" class="btn btn-ghost" on:click={cancelEdit}>✕</button>
+					</div>
 					<form class="edit-form subpage-form" on:submit={submitEdit}>
 						<input type="hidden" name="id" value={selectedAdmin.id} />
-						<label for="username">Username</label>
-						<input id="username" name="username" type="text" bind:value={selectedAdmin.username} required />
-						<div style="display:flex; gap:0.5rem; margin-top:0.75rem;">
-							<button type="submit" class="btn btn-update">Update</button>
-							<button type="button" class="btn btn-ghost" on:click={cancelEdit}>Cancel</button>
+						<div class="form-grid">
+							<label for="username">
+								Username
+								<input id="username" name="username" type="text" bind:value={selectedAdmin.username} required />
+							</label>
+							<label for="name">
+								Full Name
+								<input id="name" name="name" type="text" bind:value={selectedAdmin.name} />
+							</label>
+							<label for="email">
+								Email
+								<input id="email" name="email" type="email" bind:value={selectedAdmin.email} />
+							</label>
+							<label for="phone">
+								Phone
+								<input id="phone" name="phone" type="tel" bind:value={selectedAdmin.phone} />
+							</label>
 						</div>
+						
+						<div class="profile-upload-section">
+							<label class="upload-label">
+								<span class="label-text">Profile Picture</span>
+								<div class="upload-simple">
+									<input 
+										type="file" 
+										accept="image/*" 
+										class="file-input-simple" 
+										on:change={handleFileUpload}
+										disabled={uploading}
+									/>
+									{#if uploading}
+										<div class="upload-status uploading">
+											<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spinning">
+												<line x1="12" y1="2" x2="12" y2="6"></line>
+												<line x1="12" y1="18" x2="12" y2="22"></line>
+												<line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+												<line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+												<line x1="2" y1="12" x2="6" y2="12"></line>
+												<line x1="18" y1="12" x2="22" y2="12"></line>
+												<line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+												<line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+											</svg>
+											<span>Uploading image...</span>
+										</div>
+									{:else if selectedAdmin.profilePic}
+										<div class="upload-status success">
+											<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<polyline points="20 6 9 17 4 12"></polyline>
+											</svg>
+											<span>Image uploaded successfully</span>
+											<button type="button" class="remove-btn" on:click={() => { if (selectedAdmin) selectedAdmin.profilePic = ''; }}>
+												Remove
+											</button>
+										</div>
+									{/if}
+								</div>
+							</label>
+							<input type="hidden" name="profilePic" bind:value={selectedAdmin.profilePic} />
+						</div>
+
+						<div class="form-actions">
+							<button type="submit" class="btn-save" disabled={uploading}>
+								<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<polyline points="20 6 9 17 4 12"></polyline>
+								</svg>
+								Save Changes
+							</button>
+							<button type="button" class="btn-cancel" on:click={cancelEdit}>
+								<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<line x1="18" y1="6" x2="6" y2="18"></line>
+									<line x1="6" y1="6" x2="18" y2="18"></line>
+								</svg>
+								Cancel
+							</button>
+						</div>
+						{#if error}<div class="error text-red-500 mt-2">{error}</div>{/if}
 					</form>
 				</div>
 			{/if}
-			<div class="resident-list">
+			<div class="admin-list">
 				{#each admins as admin}
-					<div class="resident-item {expandedId === admin.id ? 'expanded' : ''}">
-						<button class="resident-summary" on:click={() => toggleExpand(admin.id)}>
-							<div class="resident-name">{admin.username}</div>
+					<div class="admin-item {expandedId === admin.id ? 'expanded' : ''}">
+						<button 
+							class="admin-summary" 
+							on:click={() => toggleExpand(admin.id)}
+							aria-expanded={expandedId === admin.id}
+						>
+							<div class="admin-avatar">
+								{#if admin.profilePic}
+									<img src={admin.profilePic} alt={admin.name || admin.username} class="avatar-img" />
+								{:else}
+									<div class="avatar-placeholder">
+										{(admin.name || admin.username).charAt(0).toUpperCase()}
+									</div>
+								{/if}
+							</div>
+							<div class="admin-info">
+								<div class="admin-name">{admin.name || admin.username}</div>
+								<div class="admin-email">{admin.email || 'No email'}</div>
+							</div>
 							<div class="chev">{expandedId === admin.id ? '▾' : '▸'}</div>
 						</button>
 						{#if expandedId === admin.id}
-							<div class="resident-details">
-								<div class="detail-row"><strong>Username:</strong> {admin.username}</div>
+							<div class="admin-details">
+								<div class="profile-section">
+									<div class="profile-avatar-large">
+										{#if admin.profilePic}
+											<img src={admin.profilePic} alt={admin.name || admin.username} class="avatar-img-large" />
+										{:else}
+											<div class="avatar-placeholder-large">
+												{(admin.name || admin.username).charAt(0).toUpperCase()}
+											</div>
+										{/if}
+									</div>
+									<div class="profile-info">
+										<h4 class="profile-name">{admin.name || admin.username}</h4>
+										<span class="role-badge">Administrator</span>
+									</div>
+								</div>
+								<div class="detail-grid">
+									<div class="detail-item">
+										<div class="detail-label">
+											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+												<circle cx="12" cy="7" r="4"></circle>
+											</svg>
+											Username
+										</div>
+										<div class="detail-value">{admin.username}</div>
+									</div>
+									<div class="detail-item">
+										<div class="detail-label">
+											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<rect width="20" height="16" x="2" y="4" rx="2"></rect>
+												<path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+											</svg>
+											Email
+										</div>
+										<div class="detail-value">{admin.email || 'Not provided'}</div>
+									</div>
+									<div class="detail-item">
+										<div class="detail-label">
+											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+											</svg>
+											Phone
+										</div>
+										<div class="detail-value">{admin.phone || 'Not provided'}</div>
+									</div>
+									<div class="detail-item">
+										<div class="detail-label">
+											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"></path>
+												<circle cx="12" cy="10" r="3"></circle>
+											</svg>
+											Full Name
+										</div>
+										<div class="detail-value">{admin.name || 'Not provided'}</div>
+									</div>
+								</div>
 								<div class="detail-actions">
-									<button type="button" class="edit-btn" on:click={() => openEdit(admin)}>Edit</button>
-									<form method="POST" action="?/deleteAdmin" style="display:inline">
+									<button type="button" class="action-btn edit" on:click|stopPropagation={() => openEdit(admin)}>
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+											<path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+										</svg>
+										Edit
+									</button>
+									<form method="POST" action="?/deleteAdmin" class="inline">
 										<input type="hidden" name="id" value={admin.id} />
-										<button type="submit" class="delete-btn">Delete</button>
+										<button type="submit" class="action-btn delete" on:click|stopPropagation>
+											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<polyline points="3 6 5 6 21 6"></polyline>
+												<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+											</svg>
+											Delete
+										</button>
 									</form>
 								</div>
 							</div>

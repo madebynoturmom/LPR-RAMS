@@ -114,72 +114,155 @@
 
  
 
+<svelte:head>
+  <link rel="stylesheet" href="/admin/dashboard/subpage.css" />
+  <link rel="stylesheet" href="/admin/dashboard/residents/residents.css" />
+</svelte:head>
+
 <div class="subpage-container">
   <div class="subpage-card">
-    <div class="subpage-header">
-      <div>
-        <h2 class="subpage-title">Manage Residents</h2>
-      </div>
-      <div class="subpage-actions">
-        <a href="/admin/dashboard/residents/create" class="add-resident-btn small-blue">+ Add Resident</a>
-      </div>
-    </div>
-
-    <div class="manage-search">
-      <form on:submit|preventDefault>
-        <div class="search-row">
-          <input type="search" aria-label="Search residents" placeholder="Search by name, email or car" bind:value={q} />
-          {#if q}
-            <button type="button" class="btn btn-ghost clear-btn" on:click={clearSearch}>Clear</button>
-          {/if}
+    <div class="page-header">
+      <div class="subpage-header">
+        <div>
+          <h2 class="subpage-title">Manage Residents</h2>
+          <p class="text-gray-500 mt-2 text-sm">Manage resident information and access control</p>
         </div>
-      </form>
-    </div>
+        <div class="subpage-actions">
+          <a href="/admin/dashboard/residents/create" class="add-resident-btn small-blue">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Add Resident
+          </a>
+        </div>
+      </div>
 
-    <h3>Residents List</h3>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Total Residents</div>
+          <div class="stat-value">{residents.length}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Search Results</div>
+          <div class="stat-value">{filteredResidents.length}</div>
+        </div>
+      </div>
+
+      <div class="search-box">
+        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.35-4.35"></path>
+        </svg>
+        <input 
+          type="search" 
+          placeholder="Search by name, email, or car number..." 
+          bind:value={q}
+        />
+      </div>
+    </div>
     {#if selectedResident}
       <div class="edit-card">
+        <div class="edit-card-header">
+          <h3>Edit Resident</h3>
+          <button type="button" class="btn btn-ghost" on:click={cancelEdit}>✕</button>
+        </div>
         <form class="edit-form subpage-form" on:submit={submitEdit}>
           <input type="hidden" name="id" value={selectedResident.id} />
-          <label>Name<input name="name" value={selectedResident.name} required /></label>
-          <label>Email<input name="email" type="email" value={selectedResident.email} required /></label>
-          <label>Phone Number<input name="phone" value={selectedResident.phone} required /></label>
-          <label>Car Number<input name="carNumber" value={selectedResident.carNumber} required /></label>
-          <label>House Address<input name="houseAddress" value={selectedResident.houseAddress} required /></label>
-          <div style="display:flex; gap:0.5rem; margin-top:0.75rem;">
-            <button type="submit" class="btn btn-update">Update</button>
+          <label>
+            Name
+            <input name="name" value={selectedResident.name} required />
+          </label>
+          <label>
+            Email
+            <input name="email" type="email" value={selectedResident.email} required />
+          </label>
+          <label>
+            Phone Number
+            <input name="phone" value={selectedResident.phone} required />
+          </label>
+          <label>
+            Car Number
+            <input name="carNumber" value={selectedResident.carNumber} required />
+          </label>
+          <label>
+            House Address
+            <input name="houseAddress" value={selectedResident.houseAddress} required />
+          </label>
+          <div class="flex gap-2 mt-3">
+            <button type="submit" class="btn btn-update">Save Changes</button>
             <button type="button" class="btn btn-ghost" on:click={cancelEdit}>Cancel</button>
           </div>
+          {#if error}<div class="error text-red-500 mt-2">{error}</div>{/if}
+          {#if success}<div class="success text-green-600 mt-2">{success}</div>{/if}
         </form>
       </div>
     {/if}
 
-    <!-- Compact accordion-style list: show only name + house address, expand to show details -->
-    <div class="resident-list">
-      {#each filteredResidents as resident (resident.id)}
-        <div class="resident-item {expandedId === resident.id ? 'expanded' : ''}">
-          <button aria-expanded={expandedId === resident.id} class="resident-summary" on:click={() => toggleExpand(resident.id)}>
-            <div class="resident-name">{resident.name}</div>
-            <div class="resident-house">{resident.houseAddress}</div>
-            <div class="chev">{expandedId === resident.id ? '▾' : '▸'}</div>
-          </button>
-          {#if expandedId === resident.id}
-            <div class="resident-details">
-              <div class="detail-row"><strong>Email:</strong> {resident.email ?? '—'}</div>
-              <div class="detail-row"><strong>Phone:</strong> {resident.phone ?? '—'}</div>
-              <div class="detail-row"><strong>Car:</strong> {resident.carNumber ?? '—'}</div>
-              <div class="detail-row"><strong>Address:</strong> {resident.houseAddress ?? '—'}</div>
-              <div class="detail-actions">
-                <button type="button" class="edit-btn" on:click={() => openEdit(resident)}>Edit</button>
-                <form method="POST" style="display:inline" on:submit|preventDefault={() => deleteResident(resident.id)}>
-                  <button type="submit" class="delete-btn">Delete</button>
-                </form>
+    {#if filteredResidents.length > 0}
+      <div class="residents-list">
+        {#each filteredResidents as resident (resident.id)}
+          <div class="resident-card">
+            <div class="resident-header">
+              <div class="resident-avatar">
+                {resident.name?.charAt(0).toUpperCase() || 'R'}
+              </div>
+              <div class="resident-main">
+                <div class="resident-title">{resident.name || 'Unnamed'}</div>
+                <div class="resident-address">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                  </svg>
+                  {resident.houseAddress || 'No address'}
+                </div>
               </div>
             </div>
-          {/if}
-        </div>
-      {/each}
-    </div>
+
+            <div class="resident-body">
+              <div class="resident-info-grid">
+                <div class="info-item">
+                  <div class="info-label">Email</div>
+                  <div class="info-value">{resident.email || '—'}</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">Phone</div>
+                  <div class="info-value">{resident.phone || '—'}</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">Vehicle</div>
+                  <div class="info-value car-number">{resident.carNumber || 'No vehicle'}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="resident-actions">
+              <button type="button" class="action-btn edit" on:click={() => openEdit(resident)}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                </svg>
+                Edit
+              </button>
+              <form method="POST" class="inline" on:submit|preventDefault={() => deleteResident(resident.id)}>
+                <button type="submit" class="action-btn delete">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                  Delete
+                </button>
+              </form>
+            </div>
+          </div>
+        {/each}
+      </div>
+    {:else}
+      <div class="empty-state">
+        <div class="empty-icon">👤</div>
+        <p class="empty-text">No residents found</p>
+        <p class="empty-subtext">Add a new resident to get started</p>
+      </div>
+    {/if}
   </div>
 </div>
 
@@ -189,5 +272,3 @@
     <div class="toast-progress"><div class="toast-bar" style="width:{toastProgress}%"></div></div>
   </div>
 {/if}
-
-<!-- styles moved to subpage.css -->

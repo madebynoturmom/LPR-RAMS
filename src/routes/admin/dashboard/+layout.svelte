@@ -13,20 +13,25 @@
       title: 'Dashboard',
       links: [
         { icon: '/icons/house-icon.svg', label: 'Overview', link: '/admin/dashboard' },
-        { icon: '', label: 'Analytics', link: '/admin/dashboard/analytics' }
+        { icon: '/icons/house-icon.svg', label: 'Analytics', link: '/admin/dashboard/analytics' }
       ]
     },
     {
       title: 'Management', 
       links: [
+        { icon: '/icons/system-residents.svg', label: 'Residents', link: '/admin/dashboard/residents' },
+        { icon: '/icons/system-guards.svg', label: 'Guards', link: '/admin/dashboard/guards' },
         { icon: '/icons/system-vehicles.svg', label: 'Vehicles', link: '/admin/dashboard/vehicles' },
-        { icon: '', label: 'Licenses', link: '/admin/dashboard/licenses' },
-        { icon: '', label: 'Reports', link: '/admin/dashboard/reports' }
+        { icon: '/icons/system-admins.svg', label: 'Admins', link: '/admin/dashboard/admins' },
+        { icon: '/icons/system-guests.svg', label: 'Guests', link: '/admin/dashboard/guests' },
+        { icon: '/icons/system-events.svg', label: 'Events', link: '/admin/dashboard/events' },
+        { icon: '/icons/view-reports.svg', label: 'Reports', link: '/admin/dashboard/reports' }
       ]
     },
     {
-      title: 'Users',
+      title: 'System',
       links: [
+        { icon: '/icons/bolt-icon.svg', label: 'System Overview', link: '/admin/dashboard/manage/system-overview' },
         { icon: '', label: 'All Users', link: '/admin/dashboard/users' },
         { icon: '', label: 'Permissions', link: '/admin/dashboard/permissions' },
         { icon: '', label: 'Activity', link: '/admin/dashboard/activity' }

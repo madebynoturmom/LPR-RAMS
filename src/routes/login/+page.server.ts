@@ -79,7 +79,7 @@ export const actions: Actions = {
         const rememberFlag = form.get('remember')?.toString() === '1';
         const ttlMs = rememberFlag ? auth.DAY_IN_MS * 30 : 1000 * 60 * 60 * 8; // 30 days vs 8 hours
         const sessionToken = auth.generateSessionToken();
-        const session = await auth.createSession(sessionToken, found.id, ttlMs);
+        const session = await auth.createSession(sessionToken, found.id, undefined, ttlMs);
         auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
       const redirectUrl = '/guard/dashboard';
       const accept = request.headers.get('accept') || '';
@@ -171,7 +171,9 @@ export const actions: Actions = {
   const rememberFlag = form.get('remember')?.toString() === '1';
   const ttlMs = rememberFlag ? auth.DAY_IN_MS * 30 : 1000 * 60 * 60 * 8; // 30 days vs 8 hours
   const sessionToken = auth.generateSessionToken();
-  const session = await auth.createSession(sessionToken, found.id, ttlMs);
+  // Pass residenceId for admin/resident (undefined for guard as they don't have residenceId in guard table)
+  const residenceId = userRole === 'guard' ? undefined : found.residenceId;
+  const session = await auth.createSession(sessionToken, found.id, residenceId, ttlMs);
   auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
       // Determine redirect URL based on role
       const redirectUrl = userRole === 'admin'

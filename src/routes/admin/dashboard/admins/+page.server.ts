@@ -23,8 +23,25 @@ export const actions = {
     const form = await event.request.formData();
     const id = form.get('id');
     const username = form.get('username');
+    const name = form.get('name');
+    const email = form.get('email');
+    const phone = form.get('phone');
+    const profilePic = form.get('profilePic');
+    
     if (typeof id !== 'string' || typeof username !== 'string') return fail(400, { error: 'Invalid input' });
-    await db.update(adminTable).set({ username }).where(eq(adminTable.id, id));
+    
+    const updateData: any = { 
+      username,
+      updatedAt: Date.now()
+    };
+    
+    // Only add fields if they have actual values (convert empty strings to null)
+    if (typeof name === 'string') updateData.name = name.trim() || null;
+    if (typeof email === 'string') updateData.email = email.trim() || null;
+    if (typeof phone === 'string') updateData.phone = phone.trim() || null;
+    if (typeof profilePic === 'string') updateData.profilePic = profilePic.trim() || null;
+    
+    await db.update(adminTable).set(updateData).where(eq(adminTable.id, id));
     return { success: true };
   },
 
