@@ -1,6 +1,7 @@
 
 <script lang="ts">
 	import type { Admin } from '$lib/server/db/schema';
+	import ActionButton from '$lib/components/ActionButton.svelte';
 	export let data;
 	let admins: Admin[] = data?.admins ?? [];
 	let error: string | null = null;
@@ -133,20 +134,21 @@
 
 <div class="subpage-container">
 	<div class="subpage-card">
+		{#if showToast}
+		  <div class="toast-wrap" role="status" aria-live="polite">
+		    <div class="toast">Admin deleted</div>
+		    <div class="toast-progress"><div class="toast-bar" style="width:{toastProgress}%"></div></div>
+		  </div>
+		{/if}
 		<div class="subpage-header">
 			<div>
 				<h2 class="subpage-title">Manage Admins</h2>
 			</div>
-
-	{#if showToast}
-	  <div class="toast-wrap" role="status" aria-live="polite">
-	    <div class="toast">Admin deleted</div>
-	    <div class="toast-progress"><div class="toast-bar" style="width:{toastProgress}%"></div></div>
-	  </div>
-	{/if}
 			<div class="subpage-actions">
-					<a class="btn btn-create" href="/admin/dashboard/admins/create">+ Add Admin</a>
-				</div>
+				<ActionButton href="/admin/dashboard/admins/create" variant="primary" size="medium" icon="add">
+					Add Admin
+				</ActionButton>
+			</div>
 		</div>
 	{#if error}
 		<div class="error">{error}</div>

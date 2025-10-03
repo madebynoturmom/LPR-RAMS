@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ActionButton from '$lib/components/ActionButton.svelte';
   // exported page data
   export let data: any;
   // guards list comes from page data
@@ -107,14 +108,10 @@
           {displayedGuards.length} guard{displayedGuards.length !== 1 ? 's' : ''} on duty
         </p>
       </div>
-      <div class="subpage-actions">
-        <a href="/admin/dashboard/guards/create" class="add-guard-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
+            <div class="subpage-actions">
+        <ActionButton href="/admin/dashboard/guards/create" variant="success" size="medium" icon="add">
           Add Guard
-        </a>
+        </ActionButton>
       </div>
     </div>
 

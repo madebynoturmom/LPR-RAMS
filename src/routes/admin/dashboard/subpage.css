@@ -331,11 +331,12 @@ html, body, .admin-layout { overflow-x: hidden; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: clamp(1rem, 3vw, 2rem);
+  margin-bottom: clamp(1.25rem, 3vw, 1.75rem);
+  padding: clamp(0.75rem, 2vw, 1rem) 0;
 }
 .subpage-title {
-  font-size: 1.6rem;
+  font-size: clamp(1.35rem, 3vw, 1.6rem);
   font-weight: 800;
   color: #0f172a;
   margin: 0 0 0.35rem 0;
@@ -343,7 +344,10 @@ html, body, .admin-layout { overflow-x: hidden; }
 }
 .subpage-actions {
   display: flex;
-  gap: 0.5rem;
+  align-items: center;
+  gap: clamp(0.5rem, 1.5vw, 0.75rem);
+  flex-shrink: 0;
+  margin-left: auto;
 }
 /* Buttons */
 .btn {
@@ -617,9 +621,9 @@ body, .subpage-container, .dashboard-container { font-size: var(--font-size-base
   .subpage-container { padding: 1rem; padding-top: 2rem; max-width: 100%; width: 100%; box-sizing: border-box; }
   /* Ensure cards are centered and constrained on mobile */
   .subpage-card { padding: 1rem; margin-left: auto; margin-right: auto; width: 100%; max-width: 680px; box-sizing: border-box; }
-  .subpage-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+  .subpage-header { flex-direction: row; align-items: center; gap: 1rem; padding: 0.75rem 0; }
   .subpage-title { font-size: 1.25rem; }
-  .subpage-actions { width: 100%; justify-content: flex-start; }
+  .subpage-actions { justify-content: flex-end; flex-shrink: 0; }
 }
 
 /* Add a compact layout for medium-large screens where a right-side summary column is used */
@@ -649,12 +653,25 @@ body, .subpage-container, .dashboard-container { font-size: var(--font-size-base
   .subpage-container { padding-left: 1rem; padding-right: 1rem; box-sizing: border-box; }
 
   /* Ensure header items stack and actions move below title */
-  .subpage-header { flex-direction: column; align-items: stretch; }
+  .subpage-header { 
+    flex-direction: column; 
+    align-items: stretch;
+    gap: clamp(0.75rem, 2vw, 1rem);
+  }
   .subpage-header > div:first-child { display:flex; align-items:center; gap:0.5rem; }
 
-  /* Make action button full-width and right-aligned inside the card */
-  .subpage-actions { width: 100%; display: flex; justify-content: flex-start; }
-  .subpage-actions .btn { width: 100%; text-align: left; padding-left: 0.9rem; }
+  /* Make action button full-width with proper padding on mobile */
+  .subpage-actions { 
+    width: 100%; 
+    display: flex; 
+    justify-content: stretch;
+    margin-left: 0;
+  }
+  .subpage-actions .btn { 
+    width: 100%; 
+    text-align: center; 
+    padding: clamp(0.75rem, 2vw, 1rem) clamp(1rem, 3vw, 1.5rem);
+  }
 }
 /* Consolidated mobile rules already present above (no-op) */
 

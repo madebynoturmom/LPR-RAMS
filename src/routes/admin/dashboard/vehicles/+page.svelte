@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ActionButton from '$lib/components/ActionButton.svelte';
 	import { goto } from '$app/navigation';
 	import type { PageData } from './$types';
 
@@ -39,13 +40,9 @@
 					<p class="text-gray-500 mt-2 text-sm">Manage registered vehicles and access control</p>
 				</div>
 				<div class="subpage-actions">
-					<a class="add-vehicle-btn" href="/admin/dashboard/vehicles/create">
-						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-							<line x1="12" y1="5" x2="12" y2="19"></line>
-							<line x1="5" y1="12" x2="19" y2="12"></line>
-						</svg>
+					<ActionButton href="/admin/dashboard/vehicles/create" variant="success" size="medium" icon="add">
 						Add Vehicle
-					</a>
+					</ActionButton>
 				</div>
 			</div>
 
