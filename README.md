@@ -1,3 +1,25 @@
+## Quick Start
+
+### Database Seeding (NEW! 🌱)
+
+Quickly populate your database with sample data for development or deployment:
+
+```sh
+npm run seed
+```
+
+This creates:
+- 1 Residence (Sunset Villa)
+- 1 Admin (username: `admin`, password: `admin123`)
+- 5 Residents (password: `resident123`)
+- 5 Vehicles
+- 3 Guards (password: `guard123`)
+- 2 Guest Passes
+
+**Perfect for EC2 deployment - hit the ground running!** 🚀
+
+See [scripts/README.md](scripts/README.md) and [EC2_DEPLOYMENT.md](EC2_DEPLOYMENT.md) for details.
+
 ## Developing
 
 Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
